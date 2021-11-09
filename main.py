@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import threading
 import tkinter.ttk
 import urllib.request
@@ -24,6 +25,7 @@ def resource_path(relative_path):
     except Exception:
         base_path = os.path.abspath(".")
 
+    print("Main Path", base_path)
     return os.path.join(base_path, relative_path)
 
 
@@ -181,7 +183,17 @@ def downloadClicked(button):
         illegal = r'<>:"/\|?*%^'
         nameFilter = "".join([char for char in videoNameText.get()[6:] if char not in illegal])
 
-        completedCommand = subprocess.run(["powershell", "-Command", f'ffmpeg -i "temp.weba" "{nameFilter}.{audioExtension}" '], capture_output=True)
+        command = ["powershell", "-Command", f"ffmpeg -i 'temp.weba' '{nameFilter}.{audioExtension}'"]
+
+        print(f"Running: {' '.join(command)}")
+
+        try:
+            os.remove(f"{nameFilter}.{audioExtension}")
+        except OSError:
+            pass
+
+        completedCommand = subprocess.run(command, capture_output=True)
+
         if completedCommand.returncode != 0:
             downloadProgressText.set("Error Occurred Whilst Converting File, Please Try Again")
         else:
